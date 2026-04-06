@@ -1,104 +1,645 @@
-あなたはプロのWebデザイナー兼フロントエンドエンジニアです。
-以下の要件を満たす、美容室のコーポレートサイト（LP）をHTML/CSSで完全再現してください。
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Peace of Hair | ナチュラルで上質な美容室</title>
+    
+    <!-- Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    
+    <!-- Google Fonts: Jost (English) & Noto Sans JP (Japanese) -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Jost:wght@300;400;500&family=Noto+Sans+JP:wght@300;400;500;700&display=swap" rel="stylesheet">
+    
+    <!-- Lucide Icons -->
+    <script src="https://unpkg.com/lucide@latest"></script>
 
-# ■目的
-ナチュラルで清潔感のある美容室サイトを作成する。
-ユーザーに安心感と上質さを与えるデザイン。
+    <!-- Tailwind Configuration -->
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        primary: {
+                            DEFAULT: '#8FAF3D', // くすみグリーン
+                            hover: '#7A9A30',
+                            light: '#EAF0D8'
+                        },
+                        base: '#ffffff',
+                        sub: '#F9F9F7', // ごく薄いベージュ・ライトグレー
+                        text: {
+                            main: '#333333',
+                            light: '#666666',
+                            muted: '#999999'
+                        }
+                    },
+                    fontFamily: {
+                        sans: ['"Noto Sans JP"', 'sans-serif'],
+                        en: ['"Jost"', 'sans-serif'],
+                    },
+                    maxWidth: {
+                        'content': '1100px', // 全体最大幅
+                    }
+                }
+            }
+        }
+    </script>
+    
+    <!-- Custom CSS -->
+    <style>
+        body {
+            font-family: 'Noto Sans JP', sans-serif;
+            color: #333333;
+            background-color: #ffffff;
+            -webkit-font-smoothing: antialiased;
+        }
 
-# ■全体デザインコンセプト
-・ミニマル
-・ナチュラル（白＋くすみグリーン＋ベージュ）
-・余白を広く使う
-・女性向け（20〜40代）
-・高級すぎず、親しみやすいサロン
+        .font-en {
+            font-family: 'Jost', sans-serif;
+        }
 
-# ■カラーテーマ
-・ベース：ホワイト（#ffffff）
-・アクセント：くすみグリーン（#8FAF3D系）
-・サブ：ライトグレー、ベージュ
-・文字：ブラック〜ダークグレー
+        /* セクションの余白設定（80-120px） */
+        .section-pad {
+            padding-top: 100px;
+            padding-bottom: 100px;
+        }
 
-# ■フォント
-・英字：細めのセリフ or サンセリフ（高級感）
-・日本語：ゴシック系（可読性重視）
+        /* セクションタイトル共通スタイル */
+        .sec-title {
+            text-align: center;
+            margin-bottom: 3.5rem;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+        }
+        .sec-title-en {
+            font-family: 'Jost', sans-serif;
+            font-size: 2.25rem;
+            font-weight: 400;
+            letter-spacing: 0.15em;
+            color: #333333;
+            margin-bottom: 0.5rem;
+        }
+        .sec-title-ja {
+            font-size: 0.8rem;
+            letter-spacing: 0.1em;
+            color: #8FAF3D;
+        }
 
-# ■レイアウト構成（上から順に完全再現）
+        /* ホバー時の軽いアニメーション（カード用） */
+        .hover-card {
+            transition: transform 0.3s ease, box-shadow 0.3s ease;
+        }
+        .hover-card:hover {
+            transform: translateY(-4px);
+            box-shadow: 0 10px 25px rgba(0, 0, 0, 0.05);
+        }
 
-① ヘッダー
-・左：ロゴ（Peace of Hair）
-・右：ナビメニュー
-（HOME / CONCEPT / MENU / GALLERY / STAFF / BLOG / SHOP / RESERVE）
-・シンプルな横並び
+        /* スクロールダウンインジケータ */
+        .scroll-down {
+            position: absolute;
+            bottom: 30px;
+            left: 50%;
+            transform: translateX(-50%);
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            color: #ffffff;
+            opacity: 0.8;
+            animation: bounce 2s infinite;
+        }
+        .scroll-down::after {
+            content: '';
+            width: 1px;
+            height: 40px;
+            background-color: #ffffff;
+            margin-top: 8px;
+        }
+        @keyframes bounce {
+            0%, 20%, 50%, 80%, 100% { transform: translateY(0) translateX(-50%); }
+            40% { transform: translateY(-10px) translateX(-50%); }
+            60% { transform: translateY(-5px) translateX(-50%); }
+        }
 
-② メインビジュアル（ファーストビュー）
-・大きな横長画像（美容室の椅子）
-・中央にロゴテキスト重ねる
-・薄いオーバーレイ
-・スクロール誘導あり
+        html {
+            scroll-behavior: smooth;
+        }
+    </style>
 
-③ INFORMATIONセクション
-・カード型で横並び（3〜6個）
-・画像＋タイトル＋カテゴリラベル
-・シンプルで余白多め
+    <!-- 画像フォールバック用スクリプト -->
+    <script>
+        function fallbackImg(img) {
+            img.onerror = null; // 無限ループ防止
+            const w = img.clientWidth > 0 ? img.clientWidth : 400;
+            const h = img.clientHeight > 0 ? img.clientHeight : 300;
+            const svg = `<svg xmlns="http://www.w3.org/2000/svg" width="${w}" height="${h}" viewBox="0 0 ${w} ${h}"><rect width="100%" height="100%" fill="#F9F9F7"/><text x="50%" y="50%" font-family="sans-serif" font-size="14" fill="#999999" text-anchor="middle" dominant-baseline="middle">Image</text></svg>`;
+            img.src = 'data:image/svg+xml;charset=UTF-8,' + encodeURIComponent(svg);
+        }
+    </script>
+</head>
+<body>
 
-④ STAFF BLOG
-・スタッフ2名の紹介
-・丸アイコン＋名前＋ボタン
-・ブログ記事サムネ付き
+    <!-- ① ヘッダー -->
+    <header class="fixed top-0 w-full z-50 bg-white/95 backdrop-blur-sm shadow-sm transition-all py-4 px-4 md:px-8" id="header">
+        <div class="max-w-content mx-auto flex justify-between items-center">
+            <!-- ロゴ -->
+            <a href="#" class="flex flex-col items-start">
+                <span class="text-2xl font-en font-medium text-primary tracking-wider">Peace of Hair</span>
+            </a>
+            
+            <!-- デスクトップ用ナビゲーション -->
+            <nav class="hidden md:flex space-x-8 items-center text-sm font-en text-text-main tracking-wider">
+                <a href="#" class="hover:text-primary transition-colors">HOME</a>
+                <a href="#concept" class="hover:text-primary transition-colors">CONCEPT</a>
+                <a href="#menu" class="hover:text-primary transition-colors">MENU</a>
+                <a href="#gallery" class="hover:text-primary transition-colors">GALLERY</a>
+                <a href="#staff" class="hover:text-primary transition-colors">STAFF</a>
+                <a href="#blog" class="hover:text-primary transition-colors">BLOG</a>
+                <a href="#" class="hover:text-primary transition-colors">SHOP</a>
+                <a href="#reserve" class="bg-primary text-white px-6 py-2 rounded-full hover:bg-primary-hover transition-colors shadow-sm">RESERVE</a>
+            </nav>
 
-⑤ バナーエリア
-・横長のバナーを2〜3枚
-・予約・キャンペーン・EC誘導
+            <!-- モバイルメニューボタン (ハンバーガー) -->
+            <button class="md:hidden text-text-main hover:text-primary">
+                <i data-lucide="menu" class="w-6 h-6"></i>
+            </button>
+        </div>
+    </header>
 
-⑥ CONCEPT
-・中央寄せテキスト
-・説明文（3〜5行）
-・下に横並び画像3枚
+    <!-- ② メインビジュアル（ファーストビュー） -->
+    <section class="relative w-full h-[85vh] flex items-center justify-center overflow-hidden">
+        <img src="https://images.unsplash.com/photo-1521590832167-7bfcfaa6362f?auto=format&fit=crop&q=80&w=2000" alt="美容室の椅子" class="absolute inset-0 w-full h-full object-cover object-center" onerror="fallbackImg(this)">
+        
+        <!-- 薄い白のオーバーレイ（ナチュラルさを出すため） -->
+        <div class="absolute inset-0 bg-white/20"></div>
+        
+        <!-- 中央ロゴテキスト -->
+        <div class="relative z-10 text-center flex flex-col items-center">
+            <h1 class="text-5xl md:text-7xl font-en text-white tracking-widest drop-shadow-md mb-4">Peace of Hair</h1>
+            <p class="text-white text-sm md:text-base tracking-widest drop-shadow font-medium">心安らぐ、ナチュラルな自分へ。</p>
+        </div>
 
-⑦ MENU
-・左：施術風景画像
-・右：メニューリスト
-（カット / カラー / トリートメント等）
-・ボタン風の項目
+        <!-- スクロール誘導 -->
+        <div class="scroll-down text-xs font-en tracking-widest">SCROLL</div>
+    </section>
 
-⑧ STAFF一覧
-・3人横並び
-・写真＋名前＋役職
+    <!-- ③ INFORMATIONセクション -->
+    <section id="information" class="section-pad max-w-content mx-auto px-4">
+        <div class="sec-title">
+            <h2 class="sec-title-en">INFORMATION</h2>
+            <span class="sec-title-ja">お知らせ</span>
+        </div>
+        
+        <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+            <!-- Card 1 -->
+            <a href="#" class="bg-white rounded-lg overflow-hidden hover-card border border-gray-100 flex flex-col h-full">
+                <div class="aspect-[4/3] overflow-hidden">
+                    <img src="https://images.unsplash.com/photo-1527799820374-dcf8d9d4a388?auto=format&fit=crop&q=80&w=400" alt="News" class="w-full h-full object-cover" onerror="fallbackImg(this)">
+                </div>
+                <div class="p-5 flex-grow flex flex-col">
+                    <div class="flex items-center gap-3 mb-2">
+                        <span class="text-[10px] bg-primary text-white px-2 py-0.5 rounded">NEW</span>
+                        <span class="text-xs text-text-muted font-en tracking-wider">2026.04.06</span>
+                    </div>
+                    <h3 class="text-sm font-medium leading-relaxed text-text-main line-clamp-2">春のナチュラルカラーキャンペーン開催中</h3>
+                </div>
+            </a>
+            
+            <!-- Card 2 -->
+            <a href="#" class="bg-white rounded-lg overflow-hidden hover-card border border-gray-100 flex flex-col h-full">
+                <div class="aspect-[4/3] overflow-hidden">
+                    <img src="https://images.unsplash.com/photo-1560066984-138dadb4c035?auto=format&fit=crop&q=80&w=400" alt="News" class="w-full h-full object-cover" onerror="fallbackImg(this)">
+                </div>
+                <div class="p-5 flex-grow flex flex-col">
+                    <div class="flex items-center gap-3 mb-2">
+                        <span class="text-[10px] bg-sub text-text-main px-2 py-0.5 rounded border border-gray-200">MENU</span>
+                        <span class="text-xs text-text-muted font-en tracking-wider">2026.03.20</span>
+                    </div>
+                    <h3 class="text-sm font-medium leading-relaxed text-text-main line-clamp-2">オーガニックヘッドスパをリニューアルしました</h3>
+                </div>
+            </a>
 
-⑨ ギャラリー
-・ヘアスタイル画像を横スクロール or グリッド
-・女性向けスタイル中心
+            <!-- Card 3 -->
+            <a href="#" class="bg-white rounded-lg overflow-hidden hover-card border border-gray-100 flex flex-col h-full">
+                <div class="aspect-[4/3] overflow-hidden">
+                    <img src="https://images.unsplash.com/photo-1580618672591-eb180b1a973f?auto=format&fit=crop&q=80&w=400" alt="News" class="w-full h-full object-cover" onerror="fallbackImg(this)">
+                </div>
+                <div class="p-5 flex-grow flex flex-col">
+                    <div class="flex items-center gap-3 mb-2">
+                        <span class="text-[10px] bg-gray-100 text-text-light px-2 py-0.5 rounded">INFO</span>
+                        <span class="text-xs text-text-muted font-en tracking-wider">2026.03.10</span>
+                    </div>
+                    <h3 class="text-sm font-medium leading-relaxed text-text-main line-clamp-2">ゴールデンウィークの営業時間についてのお知らせ</h3>
+                </div>
+            </a>
 
-⑩ バナー（リピート）
-・予約やEC導線
+            <!-- Card 4 -->
+            <a href="#" class="bg-white rounded-lg overflow-hidden hover-card border border-gray-100 flex flex-col h-full">
+                <div class="aspect-[4/3] overflow-hidden">
+                    <img src="https://images.unsplash.com/photo-1595152772835-219674b2a8a6?auto=format&fit=crop&q=80&w=400" alt="News" class="w-full h-full object-cover" onerror="fallbackImg(this)">
+                </div>
+                <div class="p-5 flex-grow flex flex-col">
+                    <div class="flex items-center gap-3 mb-2">
+                        <span class="text-[10px] bg-sub text-text-main px-2 py-0.5 rounded border border-gray-200">BLOG</span>
+                        <span class="text-xs text-text-muted font-en tracking-wider">2026.02.28</span>
+                    </div>
+                    <h3 class="text-sm font-medium leading-relaxed text-text-main line-clamp-2">自宅でできる！簡単ヘアケアのコツ</h3>
+                </div>
+            </a>
+        </div>
+        
+        <div class="text-center mt-10">
+            <a href="#" class="inline-flex items-center text-sm font-en text-text-light hover:text-primary transition-colors">
+                VIEW MORE <i data-lucide="chevron-right" class="w-4 h-4 ml-1"></i>
+            </a>
+        </div>
+    </section>
 
-⑪ 地域活動・特徴
-・アイコン付き説明（4〜6個）
-・例：キッズ対応、バリアフリーなど
+    <!-- ④ STAFF BLOG -->
+    <section id="blog" class="section-pad bg-sub">
+        <div class="max-w-content mx-auto px-4">
+            <div class="sec-title">
+                <h2 class="sec-title-en">STAFF BLOG</h2>
+                <span class="sec-title-ja">スタッフブログ</span>
+            </div>
 
-⑫ INSTAGRAM
-・投稿一覧風グリッド
+            <div class="flex flex-col md:flex-row justify-center gap-10 md:gap-20">
+                <!-- Staff 1 -->
+                <div class="flex flex-col items-center">
+                    <div class="flex items-center justify-between w-full max-w-sm mb-6 bg-white p-4 rounded-xl shadow-sm">
+                        <div class="flex items-center gap-4">
+                            <img src="https://images.unsplash.com/photo-1580489944761-15a19d654956?auto=format&fit=crop&q=80&w=150" alt="Satomi" class="w-14 h-14 rounded-full object-cover" onerror="fallbackImg(this)">
+                            <div>
+                                <p class="text-[10px] text-primary font-en tracking-widest mb-0.5">Top Stylist</p>
+                                <p class="text-sm font-medium text-text-main">Satomi</p>
+                            </div>
+                        </div>
+                        <a href="#" class="bg-primary text-white text-xs px-4 py-2 rounded-full hover:bg-primary-hover transition-colors">ブログ一覧</a>
+                    </div>
+                    <div class="grid grid-cols-2 gap-3 w-full max-w-sm">
+                        <a href="#" class="block overflow-hidden rounded-lg hover-card">
+                            <img src="https://images.unsplash.com/photo-1562322140-8baeececf3df?auto=format&fit=crop&q=80&w=300" alt="Blog" class="w-full aspect-square object-cover" onerror="fallbackImg(this)">
+                        </a>
+                        <a href="#" class="block overflow-hidden rounded-lg hover-card">
+                            <img src="https://images.unsplash.com/photo-1556228578-0d85b1a4d571?auto=format&fit=crop&q=80&w=300" alt="Blog" class="w-full aspect-square object-cover" onerror="fallbackImg(this)">
+                        </a>
+                    </div>
+                </div>
 
-⑬ フッター
-・店舗外観画像
-・住所・電話番号・営業時間
-・予約ボタン（強調）
-・地図 or 情報
+                <!-- Staff 2 -->
+                <div class="flex flex-col items-center">
+                    <div class="flex items-center justify-between w-full max-w-sm mb-6 bg-white p-4 rounded-xl shadow-sm">
+                        <div class="flex items-center gap-4">
+                            <img src="https://images.unsplash.com/photo-1534528741775-53994a69daeb?auto=format&fit=crop&q=80&w=150" alt="Yuka" class="w-14 h-14 rounded-full object-cover" onerror="fallbackImg(this)">
+                            <div>
+                                <p class="text-[10px] text-primary font-en tracking-widest mb-0.5">Stylist</p>
+                                <p class="text-sm font-medium text-text-main">Yuka</p>
+                            </div>
+                        </div>
+                        <a href="#" class="bg-primary text-white text-xs px-4 py-2 rounded-full hover:bg-primary-hover transition-colors">ブログ一覧</a>
+                    </div>
+                    <div class="grid grid-cols-2 gap-3 w-full max-w-sm">
+                        <a href="#" class="block overflow-hidden rounded-lg hover-card">
+                            <img src="https://images.unsplash.com/photo-1522337660859-02fbefca4702?auto=format&fit=crop&q=80&w=300" alt="Blog" class="w-full aspect-square object-cover" onerror="fallbackImg(this)">
+                        </a>
+                        <a href="#" class="block overflow-hidden rounded-lg hover-card">
+                            <img src="https://images.unsplash.com/photo-1617897903246-719242758050?auto=format&fit=crop&q=80&w=300" alt="Blog" class="w-full aspect-square object-cover" onerror="fallbackImg(this)">
+                        </a>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
 
-# ■UI/UXルール
-・余白をしっかり取る（padding多め）
-・カードデザインは角丸＋影少し
-・ホバーで軽いアニメーション
-・ボタンはグリーン系で統一
-・スマホ対応（レスポンシブ必須）
+    <!-- ⑤ バナーエリア -->
+    <section class="py-16 max-w-content mx-auto px-4">
+        <div class="flex flex-col md:flex-row gap-6 justify-center">
+            <!-- バナー 1 -->
+            <a href="#" class="relative block w-full md:w-1/2 overflow-hidden rounded-xl group">
+                <img src="https://images.unsplash.com/photo-1515377905703-c4788e51af15?auto=format&fit=crop&q=80&w=800&h=250" alt="WEB予約" class="w-full h-32 md:h-40 object-cover group-hover:scale-105 transition-transform duration-500" onerror="fallbackImg(this)">
+                <div class="absolute inset-0 bg-primary/80 flex items-center justify-center">
+                    <div class="text-center text-white">
+                        <p class="font-en tracking-widest text-xl mb-1 drop-shadow-sm">WEB RESERVATION</p>
+                        <p class="text-xs tracking-wider">24時間いつでも簡単WEB予約</p>
+                    </div>
+                </div>
+            </a>
+            
+            <!-- バナー 2 -->
+            <a href="#" class="relative block w-full md:w-1/2 overflow-hidden rounded-xl group">
+                <img src="https://images.unsplash.com/photo-1559599101-f09722fb4948?auto=format&fit=crop&q=80&w=800&h=250" alt="オンラインショップ" class="w-full h-32 md:h-40 object-cover group-hover:scale-105 transition-transform duration-500" onerror="fallbackImg(this)">
+                <div class="absolute inset-0 bg-white/80 backdrop-blur-sm flex items-center justify-center border border-gray-200 rounded-xl">
+                    <div class="text-center text-text-main">
+                        <p class="font-en tracking-widest text-xl mb-1 text-primary">ONLINE SHOP</p>
+                        <p class="text-xs tracking-wider">サロン専売品をご自宅へ</p>
+                    </div>
+                </div>
+            </a>
+        </div>
+    </section>
 
-# ■出力形式
-・HTML + CSS（1ファイル or 分離OK）
-・そのままブラウザで動く状態
-・画像はダミーでもOK（unsplash使用）
+    <!-- ⑥ CONCEPT -->
+    <section id="concept" class="section-pad max-w-content mx-auto px-4 text-center">
+        <div class="sec-title">
+            <h2 class="sec-title-en">CONCEPT</h2>
+            <span class="sec-title-ja">私たちの想い</span>
+        </div>
 
-# ■重要
-・デザインは「美容室サイトらしい上品さ」を最優先
-・ごちゃごちゃさせない
-・余白とバランスを最重要視
-・視線の流れを意識（上→下）
+        <h3 class="text-xl md:text-2xl font-medium tracking-wider mb-8 text-text-main leading-relaxed">
+            髪に優しい、<br class="md:hidden">心に優しい時間。
+        </h3>
+
+        <p class="text-sm md:text-base leading-loose text-text-light mb-16 max-w-2xl mx-auto">
+            Peace of Hairは、ナチュラル志向の大人女性のための美容室です。<br>
+            白とくすみグリーンを基調とした、清潔感あふれる穏やかな空間で、<br>
+            日常の忙しさを忘れるリラックスしたひとときをご提供します。<br>
+            <br>
+            髪や地肌に負担をかけない厳選された薬剤を使用し、<br>
+            あなたらしい、自然な美しさを引き出します。
+        </p>
+
+        <!-- 画像3枚横並び -->
+        <div class="grid grid-cols-1 md:grid-cols-3 gap-4 md:gap-8">
+            <img src="https://images.unsplash.com/photo-1600573472550-8090b5e0745e?auto=format&fit=crop&q=80&w=400" alt="サロン風景1" class="w-full aspect-[4/3] object-cover rounded-xl shadow-sm" onerror="fallbackImg(this)">
+            <img src="https://images.unsplash.com/photo-1527799820374-dcf8d9d4a388?auto=format&fit=crop&q=80&w=400" alt="サロン風景2" class="w-full aspect-[4/3] object-cover rounded-xl shadow-sm" onerror="fallbackImg(this)">
+            <img src="https://images.unsplash.com/photo-1556228578-0d85b1a4d571?auto=format&fit=crop&q=80&w=400" alt="サロン風景3" class="w-full aspect-[4/3] object-cover rounded-xl shadow-sm" onerror="fallbackImg(this)">
+        </div>
+    </section>
+
+    <!-- ⑦ MENU -->
+    <section id="menu" class="section-pad bg-sub">
+        <div class="max-w-content mx-auto px-4">
+            <div class="sec-title">
+                <h2 class="sec-title-en">MENU</h2>
+                <span class="sec-title-ja">メニュー</span>
+            </div>
+
+            <div class="flex flex-col md:flex-row gap-10 lg:gap-16 items-start">
+                <!-- 左：画像 -->
+                <div class="w-full md:w-1/2 rounded-2xl overflow-hidden shadow-sm">
+                    <img src="https://images.unsplash.com/photo-1595476108010-b4d1f10d5e43?auto=format&fit=crop&q=80&w=800" alt="施術風景" class="w-full h-auto object-cover aspect-[4/5]" onerror="fallbackImg(this)">
+                </div>
+
+                <!-- 右：メニューリスト（ボタン風） -->
+                <div class="w-full md:w-1/2 flex flex-col gap-4">
+                    <a href="#" class="bg-white p-5 rounded-xl shadow-sm flex justify-between items-center hover:bg-primary hover:text-white transition-colors group">
+                        <div class="flex flex-col">
+                            <span class="font-en text-lg tracking-wider font-medium group-hover:text-white text-text-main">CUT</span>
+                            <span class="text-xs text-text-muted group-hover:text-white/80">カット（シャンプー・ブロー込）</span>
+                        </div>
+                        <i data-lucide="chevron-right" class="w-5 h-5 text-primary group-hover:text-white"></i>
+                    </a>
+
+                    <a href="#" class="bg-white p-5 rounded-xl shadow-sm flex justify-between items-center hover:bg-primary hover:text-white transition-colors group">
+                        <div class="flex flex-col">
+                            <span class="font-en text-lg tracking-wider font-medium group-hover:text-white text-text-main">COLOR</span>
+                            <span class="text-xs text-text-muted group-hover:text-white/80">オーガニックカラー / デザインカラー</span>
+                        </div>
+                        <i data-lucide="chevron-right" class="w-5 h-5 text-primary group-hover:text-white"></i>
+                    </a>
+
+                    <a href="#" class="bg-white p-5 rounded-xl shadow-sm flex justify-between items-center hover:bg-primary hover:text-white transition-colors group">
+                        <div class="flex flex-col">
+                            <span class="font-en text-lg tracking-wider font-medium group-hover:text-white text-text-main">PERM</span>
+                            <span class="text-xs text-text-muted group-hover:text-white/80">ナチュラルパーマ / デジタルパーマ</span>
+                        </div>
+                        <i data-lucide="chevron-right" class="w-5 h-5 text-primary group-hover:text-white"></i>
+                    </a>
+
+                    <a href="#" class="bg-white p-5 rounded-xl shadow-sm flex justify-between items-center hover:bg-primary hover:text-white transition-colors group">
+                        <div class="flex flex-col">
+                            <span class="font-en text-lg tracking-wider font-medium group-hover:text-white text-text-main">TREATMENT & SPA</span>
+                            <span class="text-xs text-text-muted group-hover:text-white/80">髪質改善 / アロマヘッドスパ</span>
+                        </div>
+                        <i data-lucide="chevron-right" class="w-5 h-5 text-primary group-hover:text-white"></i>
+                    </a>
+                    
+                    <div class="mt-4 text-center md:text-left">
+                        <a href="#" class="inline-flex items-center text-sm text-primary hover:text-primary-hover font-medium underline-offset-4 hover:underline">
+                            すべてのメニューと料金を見る
+                        </a>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- ⑧ STAFF一覧 -->
+    <section id="staff" class="section-pad max-w-content mx-auto px-4">
+        <div class="sec-title">
+            <h2 class="sec-title-en">STAFF</h2>
+            <span class="sec-title-ja">スタッフ</span>
+        </div>
+
+        <div class="grid grid-cols-1 sm:grid-cols-3 gap-10 md:gap-16">
+            <!-- スタッフ 1 -->
+            <div class="text-center group cursor-pointer">
+                <div class="overflow-hidden rounded-full aspect-square w-48 mx-auto mb-6 bg-sub">
+                    <img src="https://images.unsplash.com/photo-1580489944761-15a19d654956?auto=format&fit=crop&q=80&w=300" alt="Satomi" class="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500" onerror="fallbackImg(this)">
+                </div>
+                <p class="text-xs text-primary font-en tracking-widest mb-1">Top Stylist</p>
+                <p class="text-lg font-medium text-text-main mb-2">Satomi</p>
+                <p class="text-xs text-text-light leading-relaxed px-2">ナチュラルな大人ボブや、透明感のあるカラーが得意です。</p>
+            </div>
+
+            <!-- スタッフ 2 -->
+            <div class="text-center group cursor-pointer">
+                <div class="overflow-hidden rounded-full aspect-square w-48 mx-auto mb-6 bg-sub">
+                    <img src="https://images.unsplash.com/photo-1534528741775-53994a69daeb?auto=format&fit=crop&q=80&w=300" alt="Yuka" class="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500" onerror="fallbackImg(this)">
+                </div>
+                <p class="text-xs text-primary font-en tracking-widest mb-1">Stylist / Spaist</p>
+                <p class="text-lg font-medium text-text-main mb-2">Yuka</p>
+                <p class="text-xs text-text-light leading-relaxed px-2">丁寧なカウンセリングと極上のヘッドスパで癒しを提供します。</p>
+            </div>
+
+            <!-- スタッフ 3 -->
+            <div class="text-center group cursor-pointer">
+                <div class="overflow-hidden rounded-full aspect-square w-48 mx-auto mb-6 bg-sub">
+                    <img src="https://images.unsplash.com/photo-1531746020798-e6953c6e8e04?auto=format&fit=crop&q=80&w=300" alt="Mio" class="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500" onerror="fallbackImg(this)">
+                </div>
+                <p class="text-xs text-primary font-en tracking-widest mb-1">Assistant</p>
+                <p class="text-lg font-medium text-text-main mb-2">Mio</p>
+                <p class="text-xs text-text-light leading-relaxed px-2">明るい笑顔で皆様をお迎えします。ヘアアレンジ勉強中です！</p>
+            </div>
+        </div>
+    </section>
+
+    <!-- ⑨ ギャラリー -->
+    <section id="gallery" class="py-20 bg-primary-light/30">
+        <div class="max-w-content mx-auto px-4 mb-10">
+            <div class="flex justify-between items-end">
+                <div>
+                    <h2 class="sec-title-en !mb-0">GALLERY</h2>
+                    <span class="sec-title-ja">スタイルギャラリー</span>
+                </div>
+                <a href="#" class="text-sm font-en text-primary hover:text-primary-hover">VIEW ALL</a>
+            </div>
+        </div>
+
+        <!-- スクロール可能なグリッド（レスポンシブ） -->
+        <div class="flex overflow-x-auto pb-8 snap-x snap-mandatory gap-4 px-4 md:px-0 md:justify-center max-w-content mx-auto hide-scrollbar">
+            <img src="https://images.unsplash.com/photo-1620331311520-246422fd82f9?auto=format&fit=crop&q=80&w=300" alt="Style 1" class="w-64 h-80 object-cover rounded-xl snap-center shrink-0 shadow-sm" onerror="fallbackImg(this)">
+            <img src="https://images.unsplash.com/photo-1595152452543-e5fc28ebc2b8?auto=format&fit=crop&q=80&w=300" alt="Style 2" class="w-64 h-80 object-cover rounded-xl snap-center shrink-0 shadow-sm" onerror="fallbackImg(this)">
+            <img src="https://images.unsplash.com/photo-1560066984-138dadb4c035?auto=format&fit=crop&q=80&w=300" alt="Style 3" class="w-64 h-80 object-cover rounded-xl snap-center shrink-0 shadow-sm" onerror="fallbackImg(this)">
+            <img src="https://images.unsplash.com/photo-1617897903246-719242758050?auto=format&fit=crop&q=80&w=300" alt="Style 4" class="w-64 h-80 object-cover rounded-xl snap-center shrink-0 shadow-sm" onerror="fallbackImg(this)">
+        </div>
+        <!-- Tailwindでスクロールバーを隠す用のインラインスタイル追加 -->
+        <style>
+            .hide-scrollbar::-webkit-scrollbar { display: none; }
+            .hide-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }
+        </style>
+    </section>
+
+    <!-- ⑩ バナー（リピート） -->
+    <section class="py-16 max-w-3xl mx-auto px-4">
+        <a href="#reserve" class="relative block w-full overflow-hidden rounded-2xl group shadow-md hover:shadow-lg transition-shadow">
+            <img src="https://images.unsplash.com/photo-1515377905703-c4788e51af15?auto=format&fit=crop&q=80&w=1000&h=300" alt="WEB予約" class="w-full h-40 md:h-48 object-cover group-hover:scale-105 transition-transform duration-700" onerror="fallbackImg(this)">
+            <div class="absolute inset-0 bg-primary/90 flex flex-col items-center justify-center text-white p-6">
+                <i data-lucide="calendar-check" class="w-8 h-8 mb-2 opacity-80"></i>
+                <p class="font-en tracking-widest text-2xl md:text-3xl mb-1">RESERVE</p>
+                <p class="text-sm">ご予約はこちらから（24時間受付）</p>
+            </div>
+        </a>
+    </section>
+
+    <!-- ⑪ 地域活動・特徴 -->
+    <section class="section-pad bg-sub">
+        <div class="max-w-content mx-auto px-4">
+            <div class="text-center mb-12">
+                <h3 class="text-xl font-medium tracking-wider text-text-main">Peace of Hair のこだわり</h3>
+            </div>
+            
+            <div class="grid grid-cols-2 md:grid-cols-4 gap-6 md:gap-10">
+                <div class="bg-white p-6 rounded-xl text-center shadow-sm flex flex-col items-center justify-center aspect-square">
+                    <div class="bg-primary-light p-4 rounded-full text-primary mb-4">
+                        <i data-lucide="leaf" class="w-6 h-6"></i>
+                    </div>
+                    <p class="text-sm font-medium mb-2 text-text-main">オーガニック商材</p>
+                    <p class="text-[10px] text-text-light">髪と肌に優しい自然由来成分の薬剤を使用</p>
+                </div>
+                
+                <div class="bg-white p-6 rounded-xl text-center shadow-sm flex flex-col items-center justify-center aspect-square">
+                    <div class="bg-primary-light p-4 rounded-full text-primary mb-4">
+                        <i data-lucide="baby" class="w-6 h-6"></i>
+                    </div>
+                    <p class="text-sm font-medium mb-2 text-text-main">キッズスペース完備</p>
+                    <p class="text-[10px] text-text-light">お子様連れのママも安心して通える環境</p>
+                </div>
+                
+                <div class="bg-white p-6 rounded-xl text-center shadow-sm flex flex-col items-center justify-center aspect-square">
+                    <div class="bg-primary-light p-4 rounded-full text-primary mb-4">
+                        <i data-lucide="coffee" class="w-6 h-6"></i>
+                    </div>
+                    <p class="text-sm font-medium mb-2 text-text-main">カフェ風ドリンク</p>
+                    <p class="text-[10px] text-text-light">こだわりのハーブティーでリラックス</p>
+                </div>
+                
+                <div class="bg-white p-6 rounded-xl text-center shadow-sm flex flex-col items-center justify-center aspect-square">
+                    <div class="bg-primary-light p-4 rounded-full text-primary mb-4">
+                        <i data-lucide="accessibility" class="w-6 h-6"></i>
+                    </div>
+                    <p class="text-sm font-medium mb-2 text-text-main">バリアフリー設計</p>
+                    <p class="text-[10px] text-text-light">段差のないフラットな店内でベビーカーも安心</p>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- ⑫ INSTAGRAM -->
+    <section class="py-16">
+        <div class="text-center mb-8">
+            <h2 class="font-en text-xl tracking-widest text-text-main mb-1">INSTAGRAM</h2>
+            <p class="text-xs text-text-light">@peace_of_hair</p>
+        </div>
+        
+        <div class="grid grid-cols-3 md:grid-cols-6 gap-1 w-full max-w-[1600px] mx-auto">
+            <img src="https://images.unsplash.com/photo-1522337660859-02fbefca4702?auto=format&fit=crop&q=80&w=300" alt="Ig" class="w-full aspect-square object-cover hover:opacity-80 transition-opacity" onerror="fallbackImg(this)">
+            <img src="https://images.unsplash.com/photo-1562322140-8baeececf3df?auto=format&fit=crop&q=80&w=300" alt="Ig" class="w-full aspect-square object-cover hover:opacity-80 transition-opacity" onerror="fallbackImg(this)">
+            <img src="https://images.unsplash.com/photo-1556228578-0d85b1a4d571?auto=format&fit=crop&q=80&w=300" alt="Ig" class="w-full aspect-square object-cover hover:opacity-80 transition-opacity" onerror="fallbackImg(this)">
+            <img src="https://images.unsplash.com/photo-1617897903246-719242758050?auto=format&fit=crop&q=80&w=300" alt="Ig" class="w-full aspect-square object-cover hover:opacity-80 transition-opacity" onerror="fallbackImg(this)">
+            <img src="https://images.unsplash.com/photo-1620331311520-246422fd82f9?auto=format&fit=crop&q=80&w=300" alt="Ig" class="w-full aspect-square object-cover hover:opacity-80 transition-opacity" onerror="fallbackImg(this)">
+            <img src="https://images.unsplash.com/photo-1595152452543-e5fc28ebc2b8?auto=format&fit=crop&q=80&w=300" alt="Ig" class="w-full aspect-square object-cover hover:opacity-80 transition-opacity" onerror="fallbackImg(this)">
+        </div>
+    </section>
+
+    <!-- ⑬ フッター -->
+    <footer class="bg-white border-t-8 border-primary pt-20 pb-10" id="reserve">
+        <div class="max-w-content mx-auto px-4">
+            <div class="flex flex-col md:flex-row gap-12 lg:gap-20 mb-16 items-center md:items-start">
+                
+                <!-- 左：店舗外観画像 -->
+                <div class="w-full md:w-5/12 rounded-2xl overflow-hidden shadow-sm">
+                    <img src="https://images.unsplash.com/photo-1524661135-423995f22d0b?auto=format&fit=crop&q=80&w=800" alt="Peace of Hair 外観" class="w-full h-auto object-cover aspect-[4/3]" onerror="fallbackImg(this)">
+                </div>
+
+                <!-- 右：店舗情報 -->
+                <div class="w-full md:w-7/12 flex flex-col items-center md:items-start text-center md:text-left">
+                    <h2 class="text-3xl font-en font-medium text-primary tracking-widest mb-2">Peace of Hair</h2>
+                    <p class="text-xs text-text-light mb-8">ピース オブ ヘア</p>
+                    
+                    <div class="space-y-4 text-sm text-text-main w-full max-w-md">
+                        <div class="flex flex-col md:flex-row md:border-b border-gray-100 pb-3">
+                            <span class="w-24 font-en text-primary text-xs tracking-wider md:pt-0.5">ADDRESS</span>
+                            <p>〒580-0000<br>大阪府松原市〇〇1-2-3 ナチュラルビル1F</p>
+                        </div>
+                        <div class="flex flex-col md:flex-row md:border-b border-gray-100 pb-3">
+                            <span class="w-24 font-en text-primary text-xs tracking-wider md:pt-1">TEL</span>
+                            <p class="font-en text-xl">072-XXX-XXXX</p>
+                        </div>
+                        <div class="flex flex-col md:flex-row md:border-b border-gray-100 pb-3">
+                            <span class="w-24 font-en text-primary text-xs tracking-wider">OPEN</span>
+                            <p>火〜土 10:00 - 19:30<br>日・祝 9:00 - 18:30</p>
+                        </div>
+                        <div class="flex flex-col md:flex-row pb-3">
+                            <span class="w-24 font-en text-primary text-xs tracking-wider">CLOSE</span>
+                            <p>毎週月曜日、第2・第3火曜日</p>
+                        </div>
+                    </div>
+
+                    <div class="mt-8 flex flex-col sm:flex-row gap-4 w-full max-w-md">
+                        <a href="#" class="flex-1 bg-primary text-white py-4 rounded-xl font-medium tracking-widest text-center hover:bg-primary-hover transition-colors shadow-md flex justify-center items-center gap-2">
+                            <i data-lucide="calendar" class="w-5 h-5"></i> WEB予約
+                        </a>
+                        <a href="#" class="flex-1 bg-white border-2 border-primary text-primary py-4 rounded-xl font-medium tracking-widest text-center hover:bg-primary-light transition-colors flex justify-center items-center gap-2">
+                            <i data-lucide="map-pin" class="w-5 h-5"></i> Google Map
+                        </a>
+                    </div>
+                </div>
+            </div>
+
+            <!-- フッターナビゲーション -->
+            <div class="flex flex-wrap justify-center gap-x-6 gap-y-2 text-[11px] font-en text-text-light mb-8">
+                <a href="#" class="hover:text-primary transition-colors">HOME</a>
+                <a href="#concept" class="hover:text-primary transition-colors">CONCEPT</a>
+                <a href="#menu" class="hover:text-primary transition-colors">MENU</a>
+                <a href="#gallery" class="hover:text-primary transition-colors">GALLERY</a>
+                <a href="#staff" class="hover:text-primary transition-colors">STAFF</a>
+                <a href="#blog" class="hover:text-primary transition-colors">BLOG</a>
+                <a href="#" class="hover:text-primary transition-colors">SHOP</a>
+            </div>
+
+            <div class="text-center text-[10px] font-en text-text-muted">
+                <p>&copy; 2026 Peace of Hair. All Rights Reserved.</p>
+            </div>
+        </div>
+    </footer>
+
+    <!-- スクリプトの初期化 -->
+    <script>
+        // Lucideアイコンの初期化
+        lucide.createIcons();
+
+        // スクロール時にヘッダーに影をつける簡単なスクリプト
+        window.addEventListener('scroll', () => {
+            const header = document.getElementById('header');
+            if (window.scrollY > 10) {
+                header.classList.add('shadow-md');
+            } else {
+                header.classList.remove('shadow-md');
+            }
+        });
+    </script>
+</body>
+</html>
